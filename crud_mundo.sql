@@ -1,0 +1,21 @@
+CREATE DATABASE bd_mundo;
+USE bd_mundo;
+
+CREATE TABLE paises (
+  id_pais INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(100) NOT NULL,
+  continente VARCHAR(50) NOT NULL,
+  populacao BIGINT DEFAULT NULL,
+  idioma VARCHAR(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE cidades (
+  id_cidade INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(100) NOT NULL,
+  populacao BIGINT DEFAULT NULL,
+  id_pais INT NOT NULL,
+  CONSTRAINT fk_cidade_pais FOREIGN KEY (id_pais)
+    REFERENCES paises(id_pais)
+    ON UPDATE CASCADE
+    ON DELETE RESTRICT
+);
