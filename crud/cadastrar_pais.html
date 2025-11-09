@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar País - CRUD Mundo</title>
+    
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        /* --- Layout Principal --- */
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: normal;
+            font-size: 1.8rem;
+        }
+        
+        /* --- Componentes (Links, Botões) --- */
+        .back-button {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #888;
+            text-decoration: none;
+            padding: 5px 0;
+        }
+
+        .back-button:hover {
+            color: #f0f0f0;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            color: #f0f0f0;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #333;
+        }
+
+        /* --- Estilos do Formulário --- */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ccc;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background-color: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            color: #f0f0f0;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        
+        /* --- Seção Extra (Busca API) --- */
+        .api-section {
+            background-color: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .api-section h3 {
+            margin-top: 0;
+            color: #f0f0f0;
+        }
+
+        .api-data {
+            margin-top: 15px;
+        }
+
+        .api-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 8px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .api-label {
+            color: #ccc;
+        }
+
+        .api-value {
+            color: #f0f0f0;
+        }
+
+        #apiSearch {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.php" class="back-button">← Voltar para Início</a>
+        <h1>Cadastrar Novo País</h1>
+
+        <form id="formPais" action="php/criar_pais.php" method="POST">
+            <div class="form-group">
+                <label for="nome">Nome do País *</label>
+                <input type="text" id="nome" name="nome" required>
+            </div>
+
+            <div class="form-group">
+                <label for="continente">Continente *</label>
+                <select id="continente" name="continente" required>
+                    <option value="">Selecione...</option>
+                    <option value="África">África</option>
+                    <option value="América do Norte">América do Norte</option>
+                    <option value="América Central">América Central</option>
+                    <option value="América do Sul">América do Sul</option>
+                    <option value="Ásia">Ásia</option>
+                    <option value="Europa">Europa</option>
+                    <option value="Oceania">Oceania</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="populacao">População</label>
+                <input type="number" id="populacao" name="populacao" min="0">
+            </div>
+
+            <div class="form-group">
+                <label for="idioma">Idioma Principal *</label>
+                <input type="text" id="idioma" name="idioma" required>
+            </div>
+
+            <button type="submit">Cadastrar País</button>
+        </form>
+
+        <div class="api-section">
+            <h3>🌍 Buscar dados da API</h3>
+            <p>Digite o nome do país em inglês para buscar dados automáticos:</p>
+            <input type="text" id="apiSearch" placeholder="Ex: brazil, france, japan" style="width: 100%; padding: 10px; margin-bottom: 10px;">
+            <button onclick="buscarDadosAPI()">Buscar da API</button>
+            
+            <div id="apiData" class="api-data" style="display: none;">
+                <div class="api-row">
+                    <span class="api-label">Idiomas:</span>
+                    <span class="api-value" id="apiIdiomas"></span>
+                </div>
+                <div class="api-row">
+                    <span class="api-label">População API:</span>
+                    <span class="api-value" id="apiPopulacao"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Função para buscar na API 'Rest Countries' ---
+        function buscarDadosAPI() {
+            const nomePais = document.getElementById('apiSearch').value.trim();
+            if (!nomePais) {
+                alert('Digite o nome de um país em inglês');
+                return;
+            }
+
+fetch(`https://restcountries.com/v3.1/name/${nomePais}`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('País não encontrado');
+        }
+        return response.json();
+    })
+        .then(data => {
+            // Normaliza o texto para comparação
+            const nomeBusca = nomePais.toLowerCase();
+
+            // Procura correspondência exata (nome comum ou oficial)
+            const pais = data.find(p =>
+                p.name.common.toLowerCase() === nomeBusca ||
+                p.name.official.toLowerCase() === nomeBusca
+            ) || data[0]; // se não achar, pega o primeiro
+
+            // Extrai idiomas e população
+            const idiomas = pais.languages ? Object.values(pais.languages).join(', ') : 'N/A';
+            document.getElementById('apiIdiomas').textContent = idiomas;
+            
+            document.getElementById('apiPopulacao').textContent = pais.population ? pais.population.toLocaleString() : 'N/A';
+            
+            document.getElementById('apiData').style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Erro na API:', error);
+            alert('País não encontrado ou erro na API. Use o nome em inglês (ex: brazil, france)');
+        });
+
+        }
+
+        // --- Validação Front-end (Extra) ---
+        document.getElementById('formPais').addEventListener('submit', function(e) {
+            const nome = document.getElementById('nome').value.trim();
+            const continente = document.getElementById('continente').value;
+            const idioma = document.getElementById('idioma').value.trim();
+
+            // Impede o envio se campos obrigatórios estiverem vazios
+            if (!nome || !continente || !idioma) {
+                e.preventDefault();
+                alert('Preencha todos os campos obrigatórios (*)');
+            }
+        });
+    </script>
+</body>
+</html>

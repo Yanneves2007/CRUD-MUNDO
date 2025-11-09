@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Cidade - CRUD Mundo</title>
+    
+    <style>
+        /* --- Configs Gerais / Tema Escuro --- */
+        body {
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container { 
+            max-width: 500px; 
+            margin: 0 auto; 
+        }
+
+        h1 { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            font-weight: normal; 
+            font-size: 1.8rem; 
+        }
+        
+        /* --- Componentes (Links, Botões) --- */
+        .back-button { 
+            display: inline-block; 
+            margin-bottom: 20px; 
+            color: #888; 
+            text-decoration: none; 
+            padding: 5px 0; 
+        }
+        
+        .back-button:hover { 
+            color: #f0f0f0; 
+        }
+
+        button { 
+            width: 100%; 
+            padding: 12px; 
+            background-color: #2a2a2a; 
+            border: 1px solid #333; 
+            border-radius: 4px; 
+            color: #f0f0f0; 
+            font-size: 1rem; 
+            cursor: pointer; 
+            margin-top: 10px; 
+        }
+        
+        button:hover { 
+            background-color: #333; 
+        }
+        
+        /* --- Estilos do Formulário --- */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            color: #ccc; 
+        }
+
+        input, select { 
+            width: 100%; 
+            padding: 12px; 
+            background-color: #2a2a2a; 
+            border: 1px solid #333; 
+            border-radius: 4px; 
+            color: #f0f0f0; 
+            font-size: 1rem; 
+            box-sizing: border-box; /* Garante que o padding não estoure a largura */
+        }
+
+        /* --- Estilos de Estado (Erro, Desabilitado) --- */
+        select:disabled, button:disabled { 
+            background-color: #222; 
+            color: #555; 
+            cursor: not-allowed; 
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #7a2a2a 0%, #8a3a3a 100%);
+            color: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid #9a4a4a;
+            display: none; /* Começa escondido */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.php" class="back-button">← Voltar para Início</a>
+        <h1>Cadastrar Nova Cidade</h1>
+
+        <div id="divErro" class="error-message">
+            É necessário cadastrar países antes de cadastrar cidades. 
+            <a href="cadastrar_pais.html" style="color: #6eff6e;">Cadastre um país primeiro</a>.
+        </div>
+
+        <form id="formCidade" action="php/criar_cidade.php" method="POST">
+            
+            <div class="form-group">
+                <label for="nome">Nome da Cidade *</label>
+                <input type="text" id="nome" name="nome" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_pais">País *</label>
+                <select id="id_pais" name="id_pais" required disabled>
+                    <option value="">Carregando países...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="populacao">População</label>
+                <input type="number" id="populacao" name="populacao" min="0">
+            </div>
+
+            <button type="submit" id="btnSubmit" disabled>Cadastrar Cidade</button>
+        </form>
+    </div>
+
+    <script>
+        // Espera o HTML ser totalmente carregado
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Seleciona os elementos do formulário que vamos manipular
+            const selectPais = document.getElementById('id_pais');
+            const btnSubmit = document.getElementById('btnSubmit');
+            const divErro = document.getElementById('divErro');
+
+            // --- Lógica Principal: Buscar Países no Banco ---
+            // Usamos 'fetch' para fazer uma requisição ao PHP
+            fetch('php/obter_paises.php')
+                .then(response => response.json()) // Converte a resposta em JSON
+                .then(paises => {
+                    // 'paises' é o array de países que veio do PHP
+                    
+                    // 1Verifica se retornou algum país
+                    if (paises.length === 0) {
+                        // Se não tem países, mostra a div de erro
+                        selectPais.innerHTML = '<option value="">Nenhum país cadastrado</option>';
+                        divErro.style.display = 'block';
+                    } else {
+                        // Se tem países, vamos preencher o select
+                        selectPais.innerHTML = '<option value="">Selecione o país...</option>';
+                        
+                        paises.forEach(pais => {
+                            const option = document.createElement('option');
+                            option.value = pais.id_pais; 
+                            option.textContent = pais.nome;
+                            selectPais.appendChild(option);
+                        });
+
+                        // Habilita o select e o botão de submit
+                        selectPais.disabled = false;
+                        btnSubmit.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    // Trata erros de conexão
+                    console.error('Erro ao buscar países:', error);
+                    selectPais.innerHTML = '<option value="">Erro ao carregar países</option>';
+                    divErro.textContent = 'Erro ao conectar com o servidor para buscar países.';
+                    divErro.style.display = 'block';
+                });
+        });
+
+        // --- Validação Front-end (Extra) ---
+        document.getElementById('formCidade').addEventListener('submit', function(e) {
+            const nome = document.getElementById('nome').value.trim();
+            const id_pais = document.getElementById('id_pais').value;
+
+            if (!nome || !id_pais) {
+                e.preventDefault(); // Cancela o envio do formulário
+                alert('Preencha o Nome e selecione o País (*)');
+            }
+        });
+    </script>
+</body>
+</html>
