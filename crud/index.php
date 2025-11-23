@@ -15,7 +15,6 @@
             line-height: 1.4;
         }
 
-        /* Container principal para centralizar o conteúdo */
         .container {
             max-width: 600px;
             margin: 0 auto;
@@ -35,32 +34,25 @@
             font-size: 0.9rem;
         }
 
-        /* --- Layout do Menu em Grid --- */
         .menu-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 colunas */
+            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin-bottom: 40px;
         }
 
-        /* --- Estilo dos Cards do Menu --- */
         .menu-card {
             background-color: #2a2a2a;
             border: 1px solid #333;
             border-radius: 6px;
             padding: 25px 20px;
             text-align: center;
-            text-decoration: none; /* Remove sublinhado do link */
+            text-decoration: none;
             color: #f0f0f0;
         }
 
         .menu-card:hover {
             background-color: #333;
-        }
-
-        .menu-card .emoji {
-            font-size: 2rem;
-            margin-bottom: 12px;
         }
 
         .menu-card h2 {
@@ -74,12 +66,21 @@
             font-size: 0.8rem;
             margin: 0;
         }
+        .menu-grid a:last-child {
+            grid-column: span 2;
+            width: 60%;
+            margin: 0 auto;
+        }
 
-        /* --- Responsividade --- */
         @media (max-width: 500px) {
-            /* Transforma o grid de 2 colunas em 1 coluna em telas pequenas */
             .menu-grid {
                 grid-template-columns: 1fr;
+            }
+
+            /* Em celular volta ao normal (auto centraliza sozinho) */
+            .menu-grid a:last-child {
+                grid-column: span 1;
+                width: 100%;
             }
         }
     </style>
@@ -93,28 +94,31 @@
         <div class="menu-grid">
             
             <a href="cadastrar_pais.html" class="menu-card">
-                <div class="emoji">➕</div>
                 <h2>Cadastrar País</h2>
                 <p>Adicionar novo país</p>
             </a>
 
             <a href="listar_paises.php" class="menu-card">
-                <div class="emoji">📋</div>
                 <h2>Listar Países</h2>
                 <p>Visualizar e gerenciar</p>
             </a>
 
             <a href="cadastrar_cidade.html" class="menu-card">
-                <div class="emoji">🏙️</div>
                 <h2>Cadastrar Cidade</h2>
                 <p>Adicionar nova cidade</p>
             </a>
 
             <a href="listar_cidades.php" class="menu-card">
-                <div class="emoji">🏢</div>
                 <h2>Listar Cidades</h2>
                 <p>Visualizar e gerenciar</p>
             </a>
+
+            <!-- CARD CENTRALIZADO -->
+            <a href="estatisticas.php" class="menu-card">
+                <h2>Estatísticas</h2>
+                <p>Dados gerais do sistema</p>
+            </a>
+
         </div>
 
     </div>
